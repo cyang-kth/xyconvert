@@ -2,12 +2,11 @@
 Created on Nov 16, 2020
 @author: Can Yang
 
-Convert xy coordinates in numpy between WGS-84, GCJ-02 and BD-09 system
-
-xy is numpy array in shape of (N,2) with coordinates order of (lat,lon)
+Convert/project xy coordinates in numpy between WGS-84, GCJ-02 and BD-09 system
 """
 
 import numpy as np
+import pyproj
 
 a = 6378245.0  # lngg axis
 ee = 0.006693421883570923
@@ -18,6 +17,24 @@ ee = 0.006693421883570923
 def assert_xy(xy):
     np.testing.assert_equal(xy.ndim,2,"xy should be two dimension")
     np.testing.assert_equal(xy.shape[1],2,"xy should contain lng,lat only")
+
+def proj(xy, from_srid, to_srid):
+    """Project xy coordinates
+
+    Args:
+        xy: a 2D numpy array storing coordinates (lng,lat) in shape of (N,2)
+        from_srid: an integer representing the input srid
+        to_srid: an integer representing the output srid
+
+    Returns:
+        a 2D numpy array with projected coordinates (lng,lat) in shape of (N,2)
+
+    """
+    assert_xy(xy)
+    f_proj = pyproj.Proj(init='epsg:{}'.format(from_srid))
+    t_proj = pyproj.Proj(init='epsg:{}'.format(to_srid))
+    fx, fy = pyproj.transform(f_proj, t_proj, xy[:,0], xy[:,1])
+    return np.dstack([fx, fy])[0]
 
 def __transformlat(lng, lat):
     ret = -100.0 + 2.0 * lng + 3.0 * lat + 0.2 * lat * lat + 0.1 * lng * lat + 0.2 * np.sqrt(np.abs(lng))
@@ -34,6 +51,15 @@ def __transformlng(lng, lat):
     return ret
 
 def wgs2gcj(xy):
+    """Convert xy coordinates in wgs84 to GCJ02
+
+    Args:
+        xy: a 2D numpy array storing wgs84 coordinates (lng,lat) in shape of (N,2).
+
+    Returns:
+        a 2D numpy array storing GCJ02 coordinates (lng,lat) in shape of (N,2).
+
+    """
     assert_xy(xy)
     wgslng = xy[:,0]
     wgslat = xy[:,1]
@@ -50,6 +76,15 @@ def wgs2gcj(xy):
     return np.vstack([gcjlng, gcjlat]).T
 
 def gcj2wgs(xy):
+    """Convert xy coordinates in GCJ02 to WGS84
+
+    Args:
+        xy: a 2D numpy array storing GCJ02 coordinates (lng,lat) in shape of (N,2).
+
+    Returns:
+        a 2D numpy array storing WGS84 coordinates (lng,lat) in shape of (N,2)
+
+    """
     assert_xy(xy)
     lng = xy[:,0]
     lat = xy[:,1]
@@ -66,6 +101,15 @@ def gcj2wgs(xy):
     return np.vstack([lng * 2 - mglng, lat * 2 - mglat]).T
 
 def gcj2bd(xy):
+    """Convert xy coordinates in GCJ02 to BD09
+
+    Args:
+        xy: a 2D numpy array storing GCJ02 coordinates (lng,lat) in shape of (N,2).
+
+    Returns:
+        a 2D numpy array storing BD09 coordinates (lng,lat) in shape of (N,2)
+
+    """
     assert_xy(xy)
     gcjLon = xy[:,0]
     gcjLat = xy[:,1]
@@ -76,6 +120,15 @@ def gcj2bd(xy):
     return np.vstack([bdLon, bdLat]).T
 
 def bd2gcj(xy):
+    """Convert xy coordinates in BD09 to GCJ02
+
+    Args:
+        xy: a 2D numpy array storing BD09 coordinates (lng,lat) in shape of (N,2).
+
+    Returns:
+        a 2D numpy array storing GCJ02 coordinates (lng,lat) in shape of (N,2)
+
+    """
     assert_xy(xy)
     bdLon = xy[:,0]
     bdLat = xy[:,1]
@@ -88,9 +141,27 @@ def bd2gcj(xy):
     return np.vstack([gcjLon, gcjLat]).T
 
 def wgs2bd(xy):
+    """Convert xy coordinates in WGS84 to BD09
+
+    Args:
+        xy: a 2D numpy array storing WGS84 coordinates (lng,lat) in shape of (N,2).
+
+    Returns:
+        a 2D numpy array storing BD09 coordinates (lng,lat) in shape of (N,2)
+
+    """
     assert_xy(xy)
     return gcj2bd(wgs2gcj(xy))
 
 def bd2wgs(xy):
+    """Convert xy coordinates in BD09 to WGS84
+
+    Args:
+        xy: a 2D numpy array storing BD09 coordinates (lng,lat) in shape of (N,2).
+
+    Returns:
+        a 2D numpy array storing WGS84 coordinates (lng,lat) in shape of (N,2)
+
+    """
     assert_xy(xy)
     return gcj2wgs(bd2gcj(xy))
