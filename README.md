@@ -4,6 +4,12 @@ This is a python package for converting xy coordinates (in lng,lat order) in num
 
 The conversion in numpy is much more efficient (50-70 times speedup) compared with previous Python implementations such as [eviltransform](https://github.com/googollee/eviltransform) and [coordTransform_py](https://github.com/wandergis/coordTransform_py) that convert only a single point at each call.
 
+### Install the package
+
+```bash
+pip install xyconvert
+```
+
 ### Usage
 
 ```python
