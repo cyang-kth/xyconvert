@@ -2,8 +2,9 @@ from setuptools import setup
 
 setup(
     name='xyconvert',
-    version='0.1.0',
-    packages=['xyconvert'],
+    version='0.1.1',
+    package_dir={'': 'xyconvert'},  # Optional
+    py_modules=["xyconvert"],
     license='MIT',
     description='Convert xy coordinates',
     long_description=open('README.md').read(),
