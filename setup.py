@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
     name='xyconvert',
-    version='0.1.1',
+    version='0.1.2',
     package_dir={'': 'xyconvert'},  # Optional
     py_modules=["xyconvert"],
     license='MIT',
